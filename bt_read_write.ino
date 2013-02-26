@@ -1,9 +1,12 @@
+#include <Wire.h>
+
 int leftM0 = 11;    // Left motor black wire
 int leftM1 = 10;    // Left motor white wire
 int rightM0 = 5;    // Right motor black wire
 int rightM1 = 6;    // Right motor white wire
 
 void setup() {
+    Wire.begin();
     Serial.begin(9600); 
     pinMode(leftM0, OUTPUT);
     pinMode(leftM1, OUTPUT);
@@ -28,6 +31,11 @@ void loop() {
             }
             Serial.println();
             processVals(ctrlVals);
+            Wire.beginTransmission(4);
+            Wire.write(ctrlVals[0]);
+            Wire.write(ctrlVals[1]);
+            Wire.endTransmission();
+            delay(1000);
         } else if (i>5){
             Serial.println("Control signal larger than 5 bytes");
         } else {
