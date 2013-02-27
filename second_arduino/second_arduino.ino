@@ -32,7 +32,7 @@ void receiveEvent(int howMany)
   while(1 < Wire.available()) // loop through all but the last
   {
     int left = Wire.read(); // receive byte as a character
-    Serial.print("The right one is ");
+    Serial.print("The left one is ");
     Serial.println(left);
     int right = Wire.read();
     Serial.print("The right one is ");

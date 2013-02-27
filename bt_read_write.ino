@@ -35,7 +35,6 @@ void loop() {
             Wire.write(ctrlVals[0]);
             Wire.write(ctrlVals[1]);
             Wire.endTransmission();
-            delay(1000);
         } else if (i>5){
             Serial.println("Control signal larger than 5 bytes");
         } else {
