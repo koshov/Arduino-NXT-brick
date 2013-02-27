@@ -1,17 +1,17 @@
 #include <Wire.h>
 
-int leftM0 = 11;    // Left motor black wire
-int leftM1 = 10;    // Left motor white wire
-int rightM0 = 5;    // Right motor black wire
-int rightM1 = 6;    // Right motor white wire
+int frontM0 = 11;    // Left motor black wire
+int frontM1 = 10;    // Left motor white wire
+int backM0 = 5;    // Right motor black wire
+int backM1 = 6;    // Right motor white wire
 
 void setup() {
     Wire.begin();
     Serial.begin(9600); 
-    pinMode(leftM0, OUTPUT);
-    pinMode(leftM1, OUTPUT);
-    pinMode(rightM0, OUTPUT);
-    pinMode(rightM1, OUTPUT);
+    pinMode(frontM0, OUTPUT);
+    pinMode(frontM1, OUTPUT);
+    pinMode(backM0, OUTPUT);
+    pinMode(backM1, OUTPUT);
     Serial.println("Hello!");
 }
 
@@ -44,15 +44,20 @@ void loop() {
 }
 
 void processVals(int ctrlVals[5]){
-    if (ctrlVals[2] > ctrlVals[3]) {    // Move forward
-        analogWrite(leftM1, 0);
-        analogWrite(rightM1, 0);
-        analogWrite(leftM0, ctrlVals[2]);
-        analogWrite(rightM0, ctrlVals[2]);
+    int direction_back = bitRead(ctrlVals[2], 7);
+    int direction_front = bitRead(ctrlVals[3], 7);
+    if (direction_front) {    // Move forward
+        analogWrite(frontM1, 0);
+        analogWrite(frontM0, ctrlVals[3]<<1);
     } else {
-        analogWrite(leftM0, 0);
-        analogWrite(rightM0, 0);
-        analogWrite(leftM1, ctrlVals[3]);
-        analogWrite(rightM1, ctrlVals[3]);
+        analogWrite(frontM0, 0);
+        analogWrite(frontM1, ctrlVals[3]<<1);
+    }
+    if (direction_back) {    // Move forward
+        analogWrite(backM0, 0);
+        analogWrite(backM1, ctrlVals[2]<<1);
+    } else {
+        analogWrite(backM1, 0);
+        analogWrite(backM0, ctrlVals[2]<<1);
     }
 }

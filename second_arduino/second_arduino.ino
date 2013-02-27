@@ -9,7 +9,8 @@ int right = 0;
 
 void setup()
 {
-    Wire.begin(4);                // join i2c bus with address #4
+    Wire.begin(4);
+    Wire.onReceive(receiveEvent);    // join i2c bus with address #4
     pinMode(leftM0, OUTPUT);
     pinMode(leftM1, OUTPUT);
     pinMode(rightM0, OUTPUT);
@@ -19,9 +20,6 @@ void setup()
 
 void loop()
 {
-    Wire.onReceive(receiveEvent);
-    processVals(right, left);
-    delay(100);
 }
 
 // function that executes whenever data is received from master
@@ -36,19 +34,22 @@ void receiveEvent(int howMany)
         right = Wire.read();
         Serial.print("The right one is ");
         Serial.println(right);
+        processVals(right, left);
      }       
 }
 
 void processVals(int right, int left){
-    if (right > left) {    // Move forward
+    int direction_right = bitRead(right, 7);
+    int direction_left = bitRead(left, 7);
+    if (direction_right) {    // Move forward
         analogWrite(leftM1, 0);
         analogWrite(rightM1, 0);
-        analogWrite(leftM0, right);
-        analogWrite(rightM0, right);
+        analogWrite(leftM0, right<<1);
+        analogWrite(rightM0, right<<1);
     } else {
         analogWrite(leftM0, 0);
         analogWrite(rightM0, 0);
-        analogWrite(leftM1, left);
-        analogWrite(rightM1, left);
+        analogWrite(leftM1, left<<1);
+        analogWrite(rightM1, left<<1);
     }
 }
