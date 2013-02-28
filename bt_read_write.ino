@@ -26,9 +26,12 @@ void loop() {
         }
         if (i==5) {         // Control package is fine
             for (int i=0; i<5; i++){
+                int direction_current = bitRead(ctrlVals[i], 7);
                 Serial.print(ctrlVals[i]);
-                Serial.print('\t');
-            }
+                Serial.print(' - ');
+                Serial.print(direction_current);
+                Serial.print('; ');
+              }
             Serial.println();
             processVals(ctrlVals);
             Wire.beginTransmission(4);

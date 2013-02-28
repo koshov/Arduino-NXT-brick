@@ -15,7 +15,8 @@ void setup()
     pinMode(leftM1, OUTPUT);
     pinMode(rightM0, OUTPUT);
     pinMode(rightM1, OUTPUT);
-    Serial.begin(9600);           // start serial for output
+    Serial.begin(9600);
+    Serial.println("Hello!");    // start serial for output
 }
 
 void loop()
@@ -26,30 +27,38 @@ void loop()
 // this function is registered as an event, see setup()
 void receiveEvent(int howMany)
 {
-    while(1 < Wire.available()) // loop through all but the last
+    while(Wire.available()) // loop through all but the last
     {
         left = Wire.read(); // receive byte as a character
-        Serial.print("The left one is ");
-        Serial.println(left);
         right = Wire.read();
-        Serial.print("The right one is ");
-        Serial.println(right);
         processVals(right, left);
-     }       
+     }
 }
 
 void processVals(int right, int left){
-    int direction_right = bitRead(right, 7);
-    int direction_left = bitRead(left, 7);
+    boolean direction_left = bitRead(left, 7);
+    Serial.print("The left one is ");
+    Serial.print(left);
+    Serial.print(". And the direction is ");
+    Serial.println(direction_left);
+    boolean direction_right = bitRead(right, 7);
+    Serial.print("The right one is ");
+    Serial.println(right);
+    Serial.print(". And the direction is ");
+    Serial.println(direction_right);
+    
     if (direction_right) {    // Move forward
-        analogWrite(leftM1, 0);
         analogWrite(rightM1, 0);
-        analogWrite(leftM0, right<<1);
         analogWrite(rightM0, right<<1);
     } else {
-        analogWrite(leftM0, 0);
         analogWrite(rightM0, 0);
+        analogWrite(rightM1, right<<1);
+    }
+    if (direction_left) {    // Move forward
+        analogWrite(leftM1, 0);
+        analogWrite(leftM0, left<<1);
+    } else {
+        analogWrite(leftM0, 0);
         analogWrite(leftM1, left<<1);
-        analogWrite(rightM1, left<<1);
     }
 }
