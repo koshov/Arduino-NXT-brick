@@ -36,28 +36,29 @@ void receiveEvent(int howMany){
 }
 
 void processVals(byte left, byte right){
-    int direction_left = bitRead(left, 7);
+    Serial.println(left);
+    boolean direction_left =  bitRead(left, 7);
     Serial.print(direction_left);
     Serial.print(" - ");
     bitClear(left, 7);
     Serial.print(left<<1);
     Serial.print("; ");
 
-    int direction_right = bitRead(right, 7);
+    boolean direction_right =  bitRead(right, 7);
     Serial.print(direction_right);
     Serial.print(" - ");
     bitClear(right, 7);
     Serial.print(right<<1);
     Serial.println("; ");
     
-    if (direction_left == 0) {    // Move left
+    if (direction_left) {    // Move left
         analogWrite(leftM1, 0);
         analogWrite(leftM0, left<<1);
     } else {
         analogWrite(leftM0, 0);
         analogWrite(leftM1, left<<1);
     }
-    if (direction_right == 0) {    // Move rigth
+    if (direction_right) {    // Move rigth
         analogWrite(rightM1, 0);
         analogWrite(rightM0, right<<1);
     } else {

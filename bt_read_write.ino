@@ -29,7 +29,7 @@ void loop() {
             for (int i=0; i<5; i++){
                 Serial.print(bitRead(ctrlVals[i], 7));
                 Serial.print(" - ");
-                bitClear(ctrlVals[i], 7);
+                // bitClear(ctrlVals[i], 7);
                 Serial.print(ctrlVals[i]<<1);
                 Serial.print("; ");
               }
@@ -49,11 +49,11 @@ void loop() {
 }
 
 void processVals(byte ctrlVals[5]){
-    int direction_front = bitRead(ctrlVals[3], 7);
+    boolean direction_front = bitRead(ctrlVals[3], 7);
     bitClear(ctrlVals[3], 7);
     byte front = ctrlVals[3]<<1;
 
-    int direction_back = bitRead(ctrlVals[2], 7);
+    boolean direction_back = bitRead(ctrlVals[2], 7);
     bitClear(ctrlVals[2], 7);
     byte back = ctrlVals[2]<<1;
 
