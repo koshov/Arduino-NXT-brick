@@ -29,7 +29,7 @@ void loop()
    Serial.print("RPM = ");      // Output RPM for debug
    Serial.print(int(RPM));      // RPM debug output
    Serial.print(" ");
-   delay(1000);   
+   delay(100);   
 }
 
 
