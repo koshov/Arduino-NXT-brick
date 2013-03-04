@@ -4,6 +4,11 @@ int frontM0 = 11;    // Left motor black wire
 int frontM1 = 10;    // Left motor white wire
 int backM0 = 5;    // Right motor black wire
 int backM1 = 6;    // Right motor white wire
+int Cycle = 0;                  // set to 0 for PulseStartTime and set to 
+unsigned long PulseStartTime;   // Saves Start of pulse in ms
+unsigned long PulseEndTime;     // Saves End of pulse in ms
+unsigned long PulseTime;        // Stores dif between start and stop of pulse
+unsigned long RPM = 0;          // RPM to ouptut (30*1000/PulseTime)
 
 void setup() {
     Wire.begin();
@@ -14,6 +19,34 @@ void setup() {
     pinMode(frontM1, OUTPUT);
     pinMode(backM0, OUTPUT);
     pinMode(backM1, OUTPUT);
+    attachInterrupt(0, RPMPulse, RISING);
+}
+
+void RPMPulse()
+{
+  if (Cycle == 0)                // Check to see if start pulse
+  {
+    PulseStartTime = millis();  // stores start time
+    Cycle = 1;           // sets counter for start of pulse
+    return;                     // a return so it doesnt run the next if
+  }
+  if (Cycle == 1)             // Check to see if end pulse
+  {
+    detachInterrupt(0);         // Turns off inturrupt for calculations
+    PulseEndTime = millis();    // stores end time
+    Cycle = 0;                  // resets counter for pulse cycle
+    calcRPM();                  // call to calculate pulse time
+  }
+}
+
+void calcRPM()
+{
+  PulseTime = PulseEndTime - PulseStartTime; // Gets pulse duration
+  Serial.print("PulseTime =");               // Output pulse time for debug
+  Serial.print(PulseTime);                   // Pulse debug output
+  Serial.print(" ");                         
+  RPM = 30*1000/PulseTime*2;                 // Calculates RPM
+  attachInterrupt(0, RPMPulse, RISING);      // re-attaches interrupt to Digi Pin 2
 }
 
 void loop() {
@@ -40,6 +73,8 @@ void loop() {
             Wire.write(ctrlVals[1]);
             Wire.endTransmission();
             Serial.println("Tuk!");
+            Serial.print("RPM= ");
+            Serial.println(RPM);
         } else if (i>5){
             Serial.println("Control signal larger than 5 bytes");
         } else {
