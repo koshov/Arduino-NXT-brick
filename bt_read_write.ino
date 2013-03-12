@@ -4,106 +4,151 @@ int frontM0 = 11;    // Left motor black wire
 int frontM1 = 10;    // Left motor white wire
 int backM0 = 5;    // Right motor black wire
 int backM1 = 6;    // Right motor white wire
-int Cycle = 0;                  // set to 0 for PulseStartTime and set to 
-unsigned long PulseStartTime;   // Saves Start of pulse in ms
-unsigned long PulseEndTime;     // Saves End of pulse in ms
-unsigned long PulseTime;        // Stores dif between start and stop of pulse
-unsigned long RPM = 0;          // RPM to ouptut (30*1000/PulseTime)
+
+int revolutions_a = 0;
+int revolutions_b = 0;
+
+unsigned long time = 0;
+
+int desired_speed_a = 0;
+int desired_speed_b = 0;
+int current_speed_a = 0;
+int current_speed_b = 0;
+
+boolean direction_front;
+boolean direction_back;
+
+int TIMECHECK = 20;
+
+int THRESHOLD = 10;
 
 void setup() {
-    Wire.begin();
-    Serial.begin(9600); 
-    Serial.println("Hello!");
-
-    pinMode(frontM0, OUTPUT);
-    pinMode(frontM1, OUTPUT);
-    pinMode(backM0, OUTPUT);
-    pinMode(backM1, OUTPUT);
-    attachInterrupt(0, RPMPulse, RISING);
+  Wire.begin();
+  Serial.begin(9600); 
+  Serial.println("Hello!");
+  time = millis();
+  pinMode(frontM0, OUTPUT);
+  pinMode(frontM1, OUTPUT);
+  pinMode(backM0, OUTPUT);
+  pinMode(backM1, OUTPUT);
+  attachInterrupt(0, RPMPulse, CHANGE);
+  attachInterrupt(1, RPMPulse2, CHANGE);
 }
 
 void RPMPulse()
 {
-  if (Cycle == 0)                // Check to see if start pulse
-  {
-    PulseStartTime = millis();  // stores start time
-    Cycle = 1;           // sets counter for start of pulse
-    return;                     // a return so it doesnt run the next if
-  }
-  if (Cycle == 1)             // Check to see if end pulse
-  {
-    detachInterrupt(0);         // Turns off inturrupt for calculations
-    PulseEndTime = millis();    // stores end time
-    Cycle = 0;                  // resets counter for pulse cycle
-    calcRPM();                  // call to calculate pulse time
-  }
+    revolutions_a++;
 }
 
-void calcRPM()
+void RPMPulse2()
 {
-  PulseTime = PulseEndTime - PulseStartTime; // Gets pulse duration
-  Serial.print("PulseTime =");               // Output pulse time for debug
-  Serial.print(PulseTime);                   // Pulse debug output
-  Serial.print(" ");                         
-  RPM = 30*1000/PulseTime*2;                 // Calculates RPM
-  attachInterrupt(0, RPMPulse, RISING);      // re-attaches interrupt to Digi Pin 2
+    revolutions_b++;
 }
 
 void loop() {
-    if (Serial.available()){
-        byte ctrlVals[5];    // Array to store control values
-        int i = 0;          // Counter for control package validation
-        delay(5);           // Timeout for serial buffer consistency
-        while (Serial.available() && i<5){
-            ctrlVals[i] = Serial.read();
-            i++;
-        }
-        if (i==5) {         // Control package is fine
-            for (int i=0; i<5; i++){
-                Serial.print(bitRead(ctrlVals[i], 7));
-                Serial.print(" - ");
-                // bitClear(ctrlVals[i], 7);
-                Serial.print(ctrlVals[i]<<1);
-                Serial.print("; ");
-              }
-            Serial.println();
-            processVals(ctrlVals);
-            Wire.beginTransmission(4);
-            Wire.write(ctrlVals[0]);
-            Wire.write(ctrlVals[1]);
-            Wire.endTransmission();
-            Serial.println("Tuk!");
-            Serial.print("RPM= ");
-            Serial.println(RPM);
-        } else if (i>5){
-            Serial.println("Control signal larger than 5 bytes");
-        } else {
-            Serial.println("Control signal less than 5 bytes");
-        }
+  if (Serial.available()){
+    byte ctrlVals[5];    // Array to store control values
+    int i = 0;          // Counter for control package validation
+    delay(5);           // Timeout for serial buffer consistency
+    while (Serial.available() && i<5){
+      ctrlVals[i] = Serial.read();
+      i++;
     }
+    if (i==5) {         // Control package is fine
+      for (int i=0; i<5; i++){
+        Serial.print(bitRead(ctrlVals[i], 7));
+        Serial.print(" - ");
+        // bitClear(ctrlVals[i], 7);
+        Serial.print(ctrlVals[i]<<1);
+        Serial.print("; ");
+      }
+      Serial.println();
+      processVals(ctrlVals);
+      Wire.beginTransmission(4);
+      Wire.write(ctrlVals[0]);
+      Wire.write(ctrlVals[1]);
+      Wire.endTransmission();
+      Serial.println("Tuk!");
+    } 
+    else if (i>5){
+      Serial.println("Control signal larger than 5 bytes");
+    } 
+    else {
+      Serial.println("Control signal less than 5 bytes");
+    }
+  }
+  if (millis() - time > TIMECHECK){
+    int temp_speed_a = revolutions_a * 250/TIMECHECK; // calculate Degrees per Second and divide by 4, to equate to desired_speed
+    int temp_speed_b = revolutions_b * 250/TIMECHECK;
+    
+    if (temp_speed_a > desired_speed_a){
+      current_speed_a--;
+    } else if (temp_speed_a < desired_speed_a) {
+      current_speed_a++; 
+    }
+    if (temp_speed_b > desired_speed_b){
+      current_speed_b--;
+    } else if (temp_speed_b < desired_speed_b) {
+      current_speed_b++;
+    }
+    
+    setSpeeds();
+   
+    revolutions_a = 0;
+    revolutions_b = 0;
+    time = millis();
+  }
 }
 
 void processVals(byte ctrlVals[5]){
-    boolean direction_front = bitRead(ctrlVals[3], 7);
-    bitClear(ctrlVals[3], 7);
-    byte front = ctrlVals[3]<<1;
+  direction_front = bitRead(ctrlVals[3], 7);
+  bitClear(ctrlVals[3], 7);
+  current_speed_a = ctrlVals[3]<<1;
+  desired_speed_a = ctrlVals[3]<<1;
 
-    boolean direction_back = bitRead(ctrlVals[2], 7);
-    bitClear(ctrlVals[2], 7);
-    byte back = ctrlVals[2]<<1;
+  direction_back = bitRead(ctrlVals[2], 7);
+  bitClear(ctrlVals[2], 7);
+  current_speed_b = ctrlVals[2]<<1;
+  desired_speed_b = ctrlVals[2]<<1;
 
-    if (direction_front) {    // Move forward
-        analogWrite(frontM1, 0);
-        analogWrite(frontM0, front);
-    } else {
-        analogWrite(frontM0, 0);
-        analogWrite(frontM1, front);
-    }
-    if (direction_back) {    // Move forward
-        analogWrite(backM0, 0);
-        analogWrite(backM1, back);
-    } else {
-        analogWrite(backM1, 0);
-        analogWrite(backM0, back);
-    }
+  setSpeeds();
+}
+
+void setSpeeds (){
+  if (desired_speed_a == 0){
+    current_speed_a = 0;
+  }
+  
+  if (desired_speed_b == 0){
+    current_speed_b = 0;
+  }
+  
+  int delta_a = current_speed_a - desired_speed_a;
+  int delta_b = current_speed_b - desired_speed_b;
+  if ( desired_speed_a > current_speed_a) { delta_a = -delta_a;} 
+  if ( desired_speed_b > current_speed_b) { delta_b = -delta_b;} 
+  
+  if (delta_a > THRESHOLD) {
+      current_speed_a = desired_speed_a;
+  }
+  if (delta_b > THRESHOLD) {
+      current_speed_b = desired_speed_b;
+  }
+    
+  if (direction_front) {    // Move forward
+    analogWrite(frontM1, 0);
+    analogWrite(frontM0, current_speed_a);
+  } 
+  else {
+    analogWrite(frontM0, 0);
+    analogWrite(frontM1, current_speed_a);
+  }
+  if (direction_back) {    // Move forward
+    analogWrite(backM0, 0);
+    analogWrite(backM1, current_speed_b);
+  } 
+  else {
+    analogWrite(backM1, 0);
+    analogWrite(backM0, current_speed_b);
+  } 
 }
