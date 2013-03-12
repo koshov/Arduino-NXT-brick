@@ -59,7 +59,7 @@ void loop() {
         Serial.print(bitRead(ctrlVals[i], 7));
         Serial.print(" - ");
         // bitClear(ctrlVals[i], 7);
-        Serial.print(ctrlVals[i]<<1);
+        Serial.print(ctrlVals[i]);
         Serial.print("; ");
       }
       Serial.println();
@@ -93,6 +93,23 @@ void loop() {
     }
     
     setSpeeds();
+    
+    
+    Serial.print("t: ");
+    Serial.print(temp_speed_a);
+    Serial.print(" c: ");
+    Serial.print(current_speed_a);
+    Serial.print(" d: ");
+    Serial.println(desired_speed_a);
+    
+    Serial.print("t: ");
+    Serial.print(temp_speed_b);
+    Serial.print(" c: ");
+    Serial.print(current_speed_b);
+    Serial.print(" d: ");
+    Serial.println(desired_speed_b);
+    
+    Serial.println();
    
     revolutions_a = 0;
     revolutions_b = 0;
@@ -115,25 +132,35 @@ void processVals(byte ctrlVals[5]){
 }
 
 void setSpeeds (){
-  if (desired_speed_a == 0){
-    current_speed_a = 0;
-  }
-  
-  if (desired_speed_b == 0){
-    current_speed_b = 0;
-  }
-  
-  int delta_a = current_speed_a - desired_speed_a;
-  int delta_b = current_speed_b - desired_speed_b;
-  if ( desired_speed_a > current_speed_a) { delta_a = -delta_a;} 
-  if ( desired_speed_b > current_speed_b) { delta_b = -delta_b;} 
-  
-  if (delta_a > THRESHOLD) {
-      current_speed_a = desired_speed_a;
-  }
-  if (delta_b > THRESHOLD) {
-      current_speed_b = desired_speed_b;
-  }
+      if (desired_speed_a == 0){
+      current_speed_a = 0;
+    } else {
+      int delta_a;
+      if ( desired_speed_a > current_speed_a){
+        delta_a = desired_speed_a - current_speed_a;
+      } else {
+        delta_a = current_speed_a - desired_speed_a;
+      }
+      if (delta_a > THRESHOLD) {
+        current_speed_a = desired_speed_a;
+        Serial.println("R_a");
+      } 
+    }
+    
+    if (desired_speed_b == 0){
+      current_speed_b = 0;
+    } else {
+      int delta_b;
+      if ( desired_speed_b > current_speed_b){
+        delta_b = desired_speed_b - current_speed_b;
+      } else {
+        delta_b = current_speed_b - desired_speed_b;
+      }  
+      if (delta_b > THRESHOLD) {
+        current_speed_b = desired_speed_b;
+        Serial.println("R_b");
+      } 
+    }
     
   if (direction_front) {    // Move forward
     analogWrite(frontM1, 0);

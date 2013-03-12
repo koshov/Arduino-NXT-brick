@@ -56,18 +56,18 @@ void loop()
     
     setSpeeds();
     
-    Serial.print("tmp: ");
+    Serial.print("t: ");
     Serial.print(temp_speed_a);
-    Serial.print(" crn: ");
+    Serial.print(" c: ");
     Serial.print(current_speed_a);
-    Serial.print(" dsr: ");
+    Serial.print(" d: ");
     Serial.println(desired_speed_a);
     
-    Serial.print("tmp: ");
+    Serial.print("t: ");
     Serial.print(temp_speed_b);
-    Serial.print(" crn: ");
+    Serial.print(" c: ");
     Serial.print(current_speed_b);
-    Serial.print(" dsr: ");
+    Serial.print(" d: ");
     Serial.println(desired_speed_b);
     
     Serial.println();
@@ -118,22 +118,34 @@ void processVals(byte left, byte right){
 void setSpeeds(){
     if (desired_speed_a == 0){
       current_speed_a = 0;
+    } else {
+      int delta_a;
+      if ( desired_speed_a > current_speed_a){
+        delta_a = desired_speed_a - current_speed_a;
+      } else {
+        delta_a = current_speed_a - desired_speed_a;
+      }
+      if (delta_a > THRESHOLD) {
+        current_speed_a = desired_speed_a;
+        Serial.println("R_a");
+      } 
     }
     
     if (desired_speed_b == 0){
       current_speed_b = 0;
-    }
-    int delta_a = current_speed_a - desired_speed_a;
-    int delta_b = current_speed_b - desired_speed_b;
-    if ( desired_speed_a > current_speed_a) { delta_a = -delta_a;} 
-    if ( desired_speed_b > current_speed_b) { delta_b = -delta_b;} 
-    
-    if (delta_a > THRESHOLD) {
-        current_speed_a = desired_speed_a;
-    }
-    if (delta_b > THRESHOLD) {
+    } else {
+      int delta_b;
+      if ( desired_speed_b > current_speed_b){
+        delta_b = desired_speed_b - current_speed_b;
+      } else {
+        delta_b = current_speed_b - desired_speed_b;
+      }  
+      if (delta_b > THRESHOLD) {
         current_speed_b = desired_speed_b;
+        Serial.println("R_b");
+      } 
     }
+    
     
     if (direction_left) {    // Move left
         analogWrite(leftM1, 0);
@@ -143,10 +155,10 @@ void setSpeeds(){
         analogWrite(leftM1, current_speed_a);
     }
     if (direction_right) {    // Move rigth
-        analogWrite(rightM1, 0);
-        analogWrite(rightM0, current_speed_b);
-    } else {
         analogWrite(rightM0, 0);
         analogWrite(rightM1, current_speed_b);
+    } else {
+        analogWrite(rightM1, 0);
+        analogWrite(rightM0, current_speed_b);
     }
 }
