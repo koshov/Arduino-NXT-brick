@@ -4,6 +4,9 @@ int frontM0 = 11;    // Left motor black wire
 int frontM1 = 10;    // Left motor white wire
 int backM0 = 5;    // Right motor black wire
 int backM1 = 6;    // Right motor white wire
+int spinner = 4;
+int kicker_a = 12;
+int kicker_b = 13;
 
 int revolutions_a = 0;
 int revolutions_b = 0;
@@ -31,18 +34,45 @@ void setup() {
   pinMode(frontM1, OUTPUT);
   pinMode(backM0, OUTPUT);
   pinMode(backM1, OUTPUT);
+  pinMode(spinner, OUTPUT);
+  pinMode(kicker_a, OUTPUT);
+  pinMode(kicker_b, OUTPUT);
+  digitalWrite(spinner, HIGH);
   attachInterrupt(0, RPMPulse, CHANGE);
   attachInterrupt(1, RPMPulse2, CHANGE);
 }
 
-void RPMPulse()
-{
+void RPMPulse() {
     revolutions_a++;
 }
 
-void RPMPulse2()
-{
+void RPMPulse2() {
     revolutions_b++;
+}
+
+void kick() {
+  //int current_delta = 0;
+  //int kick_time = millis();
+  digitalWrite(kicker_a, HIGH);
+//  while (current_delta < TIMECHECK){
+//    current_delta = millis() - kick_time;
+//  }
+  //digitalWrite(kicker_a, LOW);
+//  current_delta = 0;
+//  kick_time = millis();
+  //digitalWrite(kicker_b, HIGH);
+//  while (current_delta < TIMECHECK*7.5){
+//    current_delta = millis() - kick_time;
+//  }
+  digitalWrite(kicker_b, LOW);
+  
+//  current_delta = 0;
+//  kick_time = millis();
+ // digitalWrite(kicker_a, HIGH);
+//  while (current_delta < TIMECHECK*5){
+//    current_delta = millis() - kick_time;
+//  }
+ // digitalWrite(kicker_a, LOW);
 }
 
 void loop() {
@@ -53,6 +83,10 @@ void loop() {
     while (Serial.available() && i<5){
       ctrlVals[i] = Serial.read();
       i++;
+    }
+    if (ctrlVals[4] != 0) {
+      Serial.println("KICK!");
+      kick();
     }
     if (i==5) {         // Control package is fine
       for (int i=0; i<5; i++){
@@ -95,21 +129,21 @@ void loop() {
     setSpeeds();
     
     
-    Serial.print("t: ");
-    Serial.print(temp_speed_a);
-    Serial.print(" c: ");
-    Serial.print(current_speed_a);
-    Serial.print(" d: ");
-    Serial.println(desired_speed_a);
-    
-    Serial.print("t: ");
-    Serial.print(temp_speed_b);
-    Serial.print(" c: ");
-    Serial.print(current_speed_b);
-    Serial.print(" d: ");
-    Serial.println(desired_speed_b);
-    
-    Serial.println();
+    //Serial.print("t: ");
+    //Serial.print(temp_speed_a);
+//    Serial.print(" c: ");
+//    Serial.print(current_speed_a);
+//    Serial.print(" d: ");
+//    Serial.println(desired_speed_a);
+//    
+    //Serial.print("t: ");
+//    Serial.print(temp_speed_b);
+    //Serial.print(" c: ");
+//    Serial.print(current_speed_b);
+//    Serial.print(" d: ");
+//    Serial.println(desired_speed_b);
+//    
+//    Serial.println();
    
     revolutions_a = 0;
     revolutions_b = 0;
@@ -143,7 +177,7 @@ void setSpeeds (){
       }
       if (delta_a > THRESHOLD) {
         current_speed_a = desired_speed_a;
-        Serial.println("R_a");
+        //Serial.println("R_a");
       } 
     }
     
@@ -158,7 +192,7 @@ void setSpeeds (){
       }  
       if (delta_b > THRESHOLD) {
         current_speed_b = desired_speed_b;
-        Serial.println("R_b");
+        //Serial.println("R_b");
       } 
     }
     
