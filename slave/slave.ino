@@ -1,7 +1,8 @@
 #include <Wire.h>
 
-int leftM0 = 11;    // Left motor black wire
-int leftM1 = 10;    // Left motor white wire
+// NOTE: swapped these two around, because of the final board's design
+int leftM0 = 10;    // Left motor black wire
+int leftM1 = 11;    // Left motor white wire
 int rightM0 = 5;    // Right motor black wire
 int rightM1 = 6;    // Right motor white wire
 
@@ -28,13 +29,15 @@ void setup()
     Wire.onReceive(receiveEvent);    // join i2c bus with address #4
     Serial.begin(9600);
     Serial.println("Hello!");    // start serial for output
+    
+    pinMode(12, INPUT); // fixing Iain's circuit's issues
 
     pinMode(leftM0, OUTPUT);
     pinMode(leftM1, OUTPUT);
     pinMode(rightM0, OUTPUT);
     pinMode(rightM1, OUTPUT);
-    attachInterrupt(0, RPMPulse, CHANGE);
-    attachInterrupt(1, RPMPulse2, CHANGE);
+    attachInterrupt(1, RPMPulse, CHANGE);
+    attachInterrupt(0, RPMPulse2, CHANGE);
 }
 
 void loop()
@@ -56,21 +59,21 @@ void loop()
     
     setSpeeds();
     
-    Serial.print("t: ");
-    Serial.print(temp_speed_a);
-    Serial.print(" c: ");
-    Serial.print(current_speed_a);
-    Serial.print(" d: ");
-    Serial.println(desired_speed_a);
+    //Serial.print("t: ");
+    //Serial.print(temp_speed_a);
+    //Serial.print(" c: ");
+    //Serial.print(current_speed_a);
+    //Serial.print(" d: ");
+    //Serial.println(desired_speed_a);
     
-    Serial.print("t: ");
-    Serial.print(temp_speed_b);
-    Serial.print(" c: ");
-    Serial.print(current_speed_b);
-    Serial.print(" d: ");
-    Serial.println(desired_speed_b);
+    //Serial.print("t: ");
+    //Serial.print(temp_speed_b);
+    //Serial.print(" c: ");
+    //Serial.print(current_speed_b);
+    //Serial.print(" d: ");
+    //Serial.println(desired_speed_b);
     
-    Serial.println();
+    //Serial.println();
     
     revolutions_a = 0;
     revolutions_b = 0;

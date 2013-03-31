@@ -38,8 +38,8 @@ void setup() {
   pinMode(kicker_a, OUTPUT);
   pinMode(kicker_b, OUTPUT);
   digitalWrite(spinner, HIGH);
-  attachInterrupt(0, RPMPulse, CHANGE);
-  attachInterrupt(1, RPMPulse2, CHANGE);
+  attachInterrupt(1, RPMPulse, CHANGE);
+  attachInterrupt(0, RPMPulse2, CHANGE);
 }
 
 void RPMPulse() {
