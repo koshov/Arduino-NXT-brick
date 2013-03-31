@@ -4,7 +4,7 @@ int frontM0 = 11;    // Left motor black wire
 int frontM1 = 10;    // Left motor white wire
 int backM0 = 5;    // Right motor black wire
 int backM1 = 6;    // Right motor white wire
-int spinner = 4;
+int spinner = 9;
 int kicker_a = 12;
 int kicker_b = 13;
 
@@ -51,28 +51,21 @@ void RPMPulse2() {
 }
 
 void kick() {
-  //int current_delta = 0;
-  //int kick_time = millis();
   digitalWrite(kicker_a, HIGH);
-//  while (current_delta < TIMECHECK){
-//    current_delta = millis() - kick_time;
-//  }
-  //digitalWrite(kicker_a, LOW);
-//  current_delta = 0;
-//  kick_time = millis();
-  //digitalWrite(kicker_b, HIGH);
-//  while (current_delta < TIMECHECK*7.5){
-//    current_delta = millis() - kick_time;
-//  }
+  digitalWrite(kicker_b, LOW);
+  delay(50);
+  
+  digitalWrite(kicker_a, LOW);
+  digitalWrite(kicker_b, HIGH);
+  delay(150);
+  
+  digitalWrite(kicker_a, HIGH);
+  digitalWrite(kicker_b, LOW);
+  delay(100);
+  
+  digitalWrite(kicker_a, LOW);
   digitalWrite(kicker_b, LOW);
   
-//  current_delta = 0;
-//  kick_time = millis();
- // digitalWrite(kicker_a, HIGH);
-//  while (current_delta < TIMECHECK*5){
-//    current_delta = millis() - kick_time;
-//  }
- // digitalWrite(kicker_a, LOW);
 }
 
 void loop() {

@@ -3,8 +3,8 @@
 // NOTE: swapped these two around, because of the final board's design
 int leftM0 = 10;    // Left motor black wire
 int leftM1 = 11;    // Left motor white wire
-int rightM0 = 5;    // Right motor black wire
-int rightM1 = 6;    // Right motor white wire
+int rightM0 = 6;    // Right motor black wire
+int rightM1 = 5;    // Right motor white wire
 
 int revolutions_a = 0;
 int revolutions_b = 0;
