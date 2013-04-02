@@ -1,5 +1,13 @@
 #include <Wire.h>
 
+#define KICKER_INDEX   4
+#define KICKER_MASK    1
+
+#define CHARGE_KICKER  1
+#define DO_KICK        2
+#define RETRACT_KICKER 3
+#define KICKER_IDLE    0
+
 int frontM0 = 11;    // Left motor black wire
 int frontM1 = 10;    // Left motor white wire
 int backM0 = 5;    // Right motor black wire
@@ -25,7 +33,11 @@ int TIMECHECK = 20;
 
 int THRESHOLD = 10;
 
-void setup() {
+int target_time;
+byte kicker_operation = KICKER_IDLE;
+  
+
+void setup(  ) {
   Wire.begin();
   Serial.begin(9600); 
   Serial.println("Hello!");
@@ -50,58 +62,56 @@ void RPMPulse2() {
     revolutions_b++;
 }
 
-void kick() {
-  digitalWrite(kicker_a, HIGH);
-  digitalWrite(kicker_b, LOW);
-  delay(50);
-  
-  digitalWrite(kicker_a, LOW);
-  digitalWrite(kicker_b, HIGH);
-  delay(150);
-  
-  digitalWrite(kicker_a, HIGH);
-  digitalWrite(kicker_b, LOW);
-  delay(100);
-  
-  digitalWrite(kicker_a, LOW);
-  digitalWrite(kicker_b, LOW);
-  
-}
-
 void loop() {
   if (Serial.available()){
     byte ctrlVals[5];    // Array to store control values
     int i = 0;          // Counter for control package validation
     delay(5);           // Timeout for serial buffer consistency
-    while (Serial.available() && i<5){
-      ctrlVals[i] = Serial.read();
-      i++;
-    }
-    if (ctrlVals[4] != 0) {
-      Serial.println("KICK!");
-      kick();
-    }
-    if (i==5) {         // Control package is fine
-      for (int i=0; i<5; i++){
-        Serial.print(bitRead(ctrlVals[i], 7));
-        Serial.print(" - ");
-        // bitClear(ctrlVals[i], 7);
-        Serial.print(ctrlVals[i]);
-        Serial.print("; ");
+    if (Serial.available()){
+      while (i<5){
+        ctrlVals[i] = Serial.read();
+        i++;
       }
-      Serial.println();
       processVals(ctrlVals);
       Wire.beginTransmission(4);
       Wire.write(ctrlVals[0]);
       Wire.write(ctrlVals[1]);
       Wire.endTransmission();
-      Serial.println("Tuk!");
-    } 
-    else if (i>5){
-      Serial.println("Control signal larger than 5 bytes");
-    } 
-    else {
-      Serial.println("Control signal less than 5 bytes");
+    }
+   
+    
+    if (((ctrlVals[KICKER_INDEX] & KICKER_MASK)!= 0) && (kicker_operation == KICKER_IDLE)) {
+      Serial.println("Phase 1");
+      digitalWrite(kicker_a, HIGH);
+      digitalWrite(kicker_b, LOW);
+      
+      kicker_operation = CHARGE_KICKER;
+      target_time = millis() + 50;
+      
+    }
+    else if ((kicker_operation == CHARGE_KICKER) && (target_time <= millis())) {
+      Serial.println("Phase 2");
+      digitalWrite(kicker_a, LOW);
+      digitalWrite(kicker_b, HIGH);
+      // 150
+      kicker_operation = DO_KICK;
+      target_time = millis() + 150;
+    }
+    else if ((kicker_operation == DO_KICK) && (target_time <= millis())) {
+      Serial.println("Phase 3");
+      digitalWrite(kicker_a, HIGH);
+      digitalWrite(kicker_b, LOW);
+      //delay(100);
+      
+      kicker_operation = RETRACT_KICKER;
+      target_time = millis() + 100;
+    }
+    else if ((kicker_operation == RETRACT_KICKER) && (target_time <= millis())) {
+      Serial.println("Phase 4");
+      digitalWrite(kicker_a, LOW);
+      digitalWrite(kicker_b, LOW);
+      
+      kicker_operation = KICKER_IDLE;
     }
   }
   if (millis() - time > TIMECHECK){
