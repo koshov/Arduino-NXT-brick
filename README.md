@@ -14,4 +14,4 @@ Georgi Koshov - http://github.com/koshov
 Stefan Sabev - http://github.com/SSabev
 
 ### Notes
-There is not much documentation at this point, but anyone is interested in the project - feel free to contact me and I would gladly provide more info.
+There is not much documentation at this point, but if you are interested in the project - feel free to contact me and I would gladly provide more info.
