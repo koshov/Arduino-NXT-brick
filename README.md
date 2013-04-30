@@ -10,6 +10,7 @@ Georgi Koshov
 
 ### Developers
 Georgi Koshov - http://github.com/koshov
+
 Stefan Sabev - http://github.com/SSabev
 
 ### Notes
